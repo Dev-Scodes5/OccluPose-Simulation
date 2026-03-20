@@ -102,8 +102,8 @@ plt.axvspan(20, 40, color='gray', alpha=0.3, label='Occlusion Window (Visibility
 
 # Formatting
 plt.title('Simulated Y-Axis Kinematic Trajectory During Severe Occlusion', fontsize=14)
-plt.xlabel('Time [Frames]', fontsize=12)
-plt.ylabel('Vertical Position [mm]', fontsize=12)
+plt.xlabel('Time (Frames)', fontsize=12)
+plt.ylabel('Vertical Position (mm)', fontsize=12)
 
 # Expand the Y-axis to make room for the legend and peak
 plt.ylim(-400, 1300) 
