@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, ConstantKernel as C
 
@@ -35,7 +36,7 @@ baseline_preds[~visible] = gt_3d[~visible] + cnn_diffusion_noise
 # Length scale tuned to human biomechanical frequencies (0.2 seconds)
 kernel = C(1.0, (1e-3, 1e3)) * RBF(length_scale=0.2, length_scale_bounds=(1e-2, 1e1))
 
-# THE FIX: normalize_y=True allows the GP to model large millimeter coordinates
+# normalize_y=True allows the GP to model large millimeter coordinates
 # alpha=1e-3 tells the GP to highly trust the visible momentum data
 gp = GaussianProcessRegressor(
     kernel=kernel,
@@ -86,3 +87,31 @@ print(f"OccluPose GP Error       : {occlupose_occ_mpjpe:.2f} mm")
 print("Overall Sequence (Weighted Average):")
 print(f"Baseline Overall         : {baseline_overall:.2f} mm")
 print(f"OccluPose Overall        : {occlupose_overall:.2f} mm")
+
+# 5. Generate Figure 3 (Trajectory Graph)
+plt.figure(figsize=(10, 5))
+
+# Plot the Y-Axis (Vertical Jump)
+frames = np.arange(num_frames)
+plt.plot(frames, gt_3d[:, 1], 'g--', linewidth=2, label='Ground Truth (Physics Parabola)')
+plt.plot(frames, baseline_preds[:, 1], 'r-', alpha=0.7, label='Baseline CNN (Spatial Noise)')
+plt.plot(frames, occlupose_preds[:, 1], 'b-', linewidth=2.5, label='OccluPose (GP Bridge)')
+
+# Highlight the Occlusion Window (Frames 20 to 40)
+plt.axvspan(20, 40, color='gray', alpha=0.3, label='Occlusion Window (Visibility = 0)')
+
+# Formatting
+plt.title('Simulated Y-Axis Kinematic Trajectory During Severe Occlusion', fontsize=14)
+plt.xlabel('Time [Frames]', fontsize=12)
+plt.ylabel('Vertical Position [mm]', fontsize=12)
+
+# Expand the Y-axis to make room for the legend and peak
+plt.ylim(-400, 1300) 
+plt.legend(loc='lower center', ncol=2, fontsize=10) # Centered, 2 columns
+
+plt.grid(True, linestyle=':', alpha=0.6)
+plt.tight_layout()
+
+# Output graph
+plt.savefig('trajectory_results.png', dpi=300)
+plt.show()
